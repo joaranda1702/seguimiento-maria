@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento de Hábitos de María y Antonio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        .view-active {
+            display: block;
+        }
+        .view-hidden {
+            display: none;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.2s, transform 0.1s;
+            text-align: center;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-nav-active {
+            background-color: #4f46e5; /* bg-indigo-600 */
+            color: white;
+        }
+        .btn-nav-inactive {
+            background-color: #374151; /* bg-gray-700 */
+            color: #d1d5db; /* text-gray-300 */
+        }
+        .btn-nav-inactive:hover {
+            background-color: #4b5563; /* bg-gray-600 */
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* bg-indigo-600 */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* bg-indigo-700 */
+        }
+        .btn-secondary {
+            background-color: #6b7280; /* bg-gray-500 */
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; /* bg-gray-600 */
+        }
+        .btn-green {
+            background-color: #059669; /* bg-green-600 */
+            color: white;
+        }
+        .btn-green:hover {
+            background-color: #047857; /* bg-green-700 */
+        }
+        .btn-blue {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+        }
+        .btn-blue:hover {
+            background-color: #1d4ed8; /* bg-blue-700 */
+        }
+        .task-btn {
+            padding: 0.375rem 0.75rem; /* px-3 py-1.5 */
+            font-size: 1.25rem; /* text-xl */
+            border-radius: 0.375rem; /* rounded-md */
+            transition: all 0.2s;
+            min-width: 44px; 
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .task-btn-pending {
+            background-color: #4b5563; 
+            color: #d1d5db; 
+        }
+        .task-btn-pending:hover {
+            background-color: #374151; 
+        }
+        .task-btn-done {
+            background-color: #10b981; 
+            color: white;
+            box-shadow: 0 0 0 2px #6ee7b7; 
+        }
+        .task-btn-not-done {
+            background-color: #ef4444; 
+            color: white;
+            box-shadow: 0 0 0 2px #fca5a5; 
+        }
+        .task-btn-disabled {
+            background-color: #6b7280; 
+            color: #d1d5db; 
+            cursor: not-allowed;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; 
+        }
+        
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .progress-bar-container {
+            background-color: #374151; 
+            border-radius: 0.375rem; 
+            overflow: hidden;
+            height: 1.25rem; 
+            width: 100%;
+        }
+        .progress-bar {
+            background-color: #10b981; 
+            height: 100%;
+            transition: width 0.3s ease-in-out;
+            text-align: right;
+            padding-right: 0.5rem;
+            color: white;
+            font-size: 0.75rem; 
+            line-height: 1.25rem; 
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+        }
+        .period-input-container { 
+        }
+        
+        .weekly-plan-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            table-layout: fixed; 
+        }
+        .weekly-plan-table th, .weekly-plan-table td {
+            border: 1px solid #374151; 
+            padding: 0.5rem; 
+            text-align: left; 
+            vertical-align: middle; 
+            font-size: 0.875rem; 
+        }
+        .weekly-plan-table th {
+            background-color: #1f2937; 
+            vertical-align: middle; 
+        }
+        .weekly-plan-table th:nth-child(1), 
+        .weekly-plan-table th:nth-child(2) { 
+            width: 20%; 
+        }
+        .weekly-plan-table th.day-header-cell { 
+            width: 8.5%; 
+            padding: 0; 
+        }
+        .day-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            width: 100%;
+            height: 100%; 
+            padding: 0.5rem 0.1rem; 
+        }
+
+        .weekly-plan-table td {
+             word-break: break-word; 
+        }
+        .weekly-plan-table td.plan-day-cell { 
+            text-align: center;   
+            vertical-align: middle; 
+            font-weight: bold;
+        }
+        .weekly-plan-table .plan-day-scheduled {
+            background-color: #059669; 
+            color: white; 
+        }
+        .weekly-plan-table .plan-day-not-scheduled {
+            background-color: #4b5563; 
+            color: #6b7280; 
+        }
+        .weekly-plan-table .bloque-cell {
+            font-weight: bold;
+            background-color: #2d3748; 
+            vertical-align: middle; 
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
+
+    <div class="w-full max-w-3xl">
+        <nav class="mb-6 flex justify-center space-x-2 sm:space-x-4">
+            <button id="navToDailyTrackerBtn" class="btn flex-1 btn-nav-active">Seguimiento Diario</button>
+            <button id="navToSummaryBtn" class="btn flex-1 btn-nav-inactive">Resumen</button>
+            <button id="navToWeeklyPlanBtn" class="btn flex-1 btn-nav-inactive">Planificación Semanal</button> 
+        </nav>
+
+        <div id="dailyTrackerView" class="view-active bg-gray-800 p-4 sm:p-6 rounded-lg shadow-xl">
+            <h1 class="text-2xl sm:text-3xl font-bold text-center text-indigo-400 mb-6">Seguimiento Diario de Hábitos</h1>
+
+            <div class="my-6 p-3 sm:p-4 bg-gray-700 rounded-lg text-center">
+                <p id="currentWeekDisplay" class="text-sm text-indigo-200 mb-1"></p> 
+                <div class="flex items-center justify-between mb-3">
+                    <button id="prevDayBtn" class="btn btn-primary text-sm sm:text-base">Anterior</button>
+                    <h2 id="currentDateDisplay" class="text-base sm:text-xl font-semibold text-center text-indigo-300 mx-2 whitespace-nowrap"></h2>
+                    <button id="nextDayBtn" class="btn btn-primary text-sm sm:text-base">Siguiente</button>
+                </div>
+                <div class="text-center mb-3">
+                    <button id="todayBtn" class="btn btn-secondary text-sm sm:text-base">Hoy</button>
+                </div>
+                <div>
+                    <label for="responsableFilterDaily" class="sr-only">Responsable</label> 
+                    <select id="responsableFilterDaily" class="w-full sm:w-1/2 mx-auto p-2.5 bg-gray-600 border border-gray-500 rounded-md text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="Todos">Todos</option>
+                        <option value="María">María</option>
+                        <option value="Antonio">Antonio</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="dailyProgressContainer" class="mb-6 px-1">
+                <div class="flex justify-between items-center mb-1">
+                    <span id="dailyProgressLabel" class="text-sm font-medium text-gray-300">Progreso del Día (Todos):</span>
+                    <span id="dailyProgressPercentageText" class="text-sm font-semibold text-indigo-300">0%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="dailyProgressBar" class="progress-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div id="taskListContainer" class="space-y-6 mb-8">
+            </div>
+
+            <div class="text-center">
+                <button id="exportCsvBtn" class="btn btn-green px-6 py-3 text-base">Exportar a CSV</button>
+            </div>
+        </div>
+
+        <div id="summaryView" class="view-hidden bg-gray-800 p-4 sm:p-6 rounded-lg shadow-xl">
+            <h1 class="text-2xl sm:text-3xl font-bold text-center text-indigo-400 mb-6">Resumen de Hábitos</h1>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-700 rounded-lg items-end">
+                <div>
+                    <label for="responsableFilterSummary" class="block text-sm font-medium text-gray-300 mb-1">Responsable</label>
+                    <select id="responsableFilterSummary" class="w-full p-2.5 bg-gray-600 border border-gray-500 rounded-md text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="Todos">Todos</option>
+                        <option value="María">María</option>
+                        <option value="Antonio">Antonio</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="summaryPeriodTypeFilter" class="block text-sm font-medium text-gray-300 mb-1">Periodo</label>
+                    <select id="summaryPeriodTypeFilter" class="w-full p-2.5 bg-gray-600 border border-gray-500 rounded-md text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="mes">Mes</option>
+                        <option value="semana">Semana</option>
+                    </select>
+                </div>
+                
+                <div id="summaryWeekContainer" class="period-input-container view-hidden">
+                    <label for="summaryWeekInput" class="block text-sm font-medium text-gray-300 mb-1">Semana N°</label>
+                    <input type="number" id="summaryWeekInput" placeholder="Ej: 20" class="w-full p-2 bg-gray-600 border border-gray-500 rounded-md text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <div id="summaryMonthContainer" class="period-input-container view-active">
+                    <label for="summaryMonthInput" class="block text-sm font-medium text-gray-300 mb-1">Mes</label>
+                    <select id="summaryMonthInput" class="w-full p-2.5 bg-gray-600 border border-gray-500 rounded-md text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                        </select>
+                </div>
+                
+                <div> 
+                    <label for="summaryYearInput" class="block text-sm font-medium text-gray-300 mb-1">Año</label>
+                    <input type="number" id="summaryYearInput" placeholder="Ej: 2025" class="w-full p-2 bg-gray-600 border border-gray-500 rounded-md text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <div class="sm:col-span-full md:col-span-4 text-center mt-2"> 
+                    <button id="applySummaryFiltersBtn" class="btn btn-blue px-8 py-3 text-base w-full sm:w-auto">Aplicar Filtros</button>
+                </div>
+            </div>
+
+            <div id="summaryResultsContainer" class="bg-gray-700 p-6 rounded-lg text-left"> 
+                <p class="text-gray-400 text-lg text-center">Selecciona el periodo y aplica para ver el resumen.</p>
+            </div>
+        </div>
+
+        <div id="weeklyPlanView" class="view-hidden bg-gray-800 p-4 sm:p-6 rounded-lg shadow-xl">
+            <h1 class="text-2xl sm:text-3xl font-bold text-center text-indigo-400 mb-6">Planificación Semanal</h1>
+            <div class="mb-4">
+                <label for="responsableFilterWeekly" class="block text-sm font-medium text-gray-300 mb-1">Ver planificación de:</label>
+                <select id="responsableFilterWeekly" class="w-full sm:w-1/2 p-2.5 bg-gray-600 border border-gray-500 rounded-md text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="María">María</option>
+                    <option value="Antonio">Antonio</option>
+                    <option value="Todos">Todos</option>
+                </select>
+            </div>
+            <div id="weeklyPlanContent" class="overflow-x-auto">
+                </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATOS PREDEFINIDOS DE HÁBITOS ---
+        const habitDefinitions = [
+            // --- TAREAS DE MARÍA ---
+            { id: 'cocinar_almuerzo_lmxjv_maria', responsable: "María", bloque: 'COCINAR', actividad: 'Cocinar almuerzo', turno: 'Almuerzo', diasActivos: [1, 2, 3, 4, 5] }, 
+            { id: 'cocinar_cena_lmxjv_maria', responsable: "María", bloque: 'COCINAR', actividad: 'Cocinar cena', turno: 'Cena', diasActivos: [1, 2, 3, 4, 5] }, 
+            { id: 'limpieza_arenero_lady_lmxj_maria', responsable: "María", bloque: 'LIMPIEZA', actividad: 'Arenero Lady', turno: 'Noche', diasActivos: [1, 2, 3, 4] }, 
+            { id: 'limpieza_bano_d_maria', responsable: "María", bloque: 'LIMPIEZA', actividad: 'Baño', turno: 'Tarde', diasActivos: [0] }, 
+            { id: 'limpieza_lavar_ropa_lmd_maria', responsable: "María", bloque: 'LIMPIEZA', actividad: 'Lavar ropa', turno: 'No aplica', diasActivos: [1, 2, 0] }, 
+            { id: 'limpieza_deshumidificador_lxv_maria', responsable: "María", bloque: 'LIMPIEZA', actividad: 'Prender Deshumidificador', turno: 'No aplica', diasActivos: [1, 3, 5] }, 
+            { id: 'ejercicios_tren_inferior_lj_maria', responsable: "María", bloque: 'EJERCICIOS', actividad: 'Tren inferior', turno: 'No aplica', diasActivos: [1, 4] }, 
+            { id: 'pedir_viveres_v_maria', responsable: "María", bloque: 'PEDIR VIVERES', actividad: 'Víveres', turno: 'Noche', diasActivos: [5] }, 
+            { id: 'luana_jugar_mxv_maria', responsable: "María", bloque: 'LUANA', actividad: 'Jugar', turno: 'No aplica', diasActivos: [2, 3, 5] }, 
+            { id: 'luana_parque_x_maria', responsable: "María", bloque: 'LUANA', actividad: 'Parque', turno: 'No aplica', diasActivos: [3] }, 
+            { id: 'luana_cine_v_maria', responsable: "María", bloque: 'LUANA', actividad: 'Cine', turno: 'No aplica', diasActivos: [5] }, 
+            { id: 'luana_cepillar_dientes_m_lmxjv_maria', responsable: "María", bloque: 'LUANA', actividad: 'Cepillar dientes', turno: 'Mañana', diasActivos: [1, 2, 3, 4, 5] }, 
+            { id: 'luana_cepillar_dientes_t_lmxjv_maria', responsable: "María", bloque: 'LUANA', actividad: 'Cepillar dientes', turno: 'Tarde', diasActivos: [1, 2, 3, 4, 5] },
+
+            // --- TAREAS DE ANTONIO ---
+            { id: 'finanzas_cuadre_cuentas_antonio', responsable: "Antonio", bloque: 'FINANZAS', actividad: 'Cuadre Cuentas', turno: 'No aplica', diasActivos: [0,1,2,3,4,5,6]}, // Nueva tarea
+            { id: 'boleteo_surepay_xsd_antonio', responsable: "Antonio", bloque: 'BOLETEO', actividad: 'Surepay', turno: 'Noche', diasActivos: [3, 6, 0] }, 
+            { id: 'aseo_cepillar_dientes_m_sd_antonio', responsable: "Antonio", bloque: 'ASEO PERSONAL', actividad: 'Cepillar dientes', turno: 'Mañana', diasActivos: [6, 0] }, 
+            { id: 'aseo_cepillar_dientes_t_sd_antonio', responsable: "Antonio", bloque: 'ASEO PERSONAL', actividad: 'Cepillar dientes', turno: 'Tarde', diasActivos: [6, 0] }, 
+            { id: 'aseo_ducha_luana_xvd_antonio', responsable: "Antonio", bloque: 'ASEO PERSONAL', actividad: 'Ducha Luana', turno: 'Noche', diasActivos: [3, 5, 0] }, 
+            { id: 'cocinar_almuerzo_sd_antonio', responsable: "Antonio", bloque: 'COCINAR', actividad: 'Cocinar almuerzo', turno: 'Almuerzo', diasActivos: [6, 0] }, 
+            { id: 'cocinar_cena_sd_antonio', responsable: "Antonio", bloque: 'COCINAR', actividad: 'Cocinar cena', turno: 'Cena', diasActivos: [6, 0] }, 
+            { id: 'limpieza_lavar_platos_lmxjv_antonio', responsable: "Antonio", bloque: 'LIMPIEZA', actividad: 'Lavar platos', turno: 'Noche', diasActivos: [1, 2, 3, 4, 5] }, 
+            { id: 'limpieza_arenero_lady_vsd_antonio', responsable: "Antonio", bloque: 'LIMPIEZA', actividad: 'Arenero Lady', turno: 'Noche', diasActivos: [5, 6, 0] }, 
+            { id: 'limpieza_bano_d_antonio', responsable: "Antonio", bloque: 'LIMPIEZA', actividad: 'Baño', turno: 'Tarde', diasActivos: [0] }, 
+            { id: 'limpieza_botar_basuras_mvd_antonio', responsable: "Antonio", bloque: 'LIMPIEZA', actividad: 'Botar basuras', turno: 'Tarde', diasActivos: [2, 5, 0] }, 
+            { id: 'luana_jugar_mxv_antonio', responsable: "Antonio", bloque: 'LUANA', actividad: 'Jugar', turno: 'No aplica', diasActivos: [2, 3, 5] }, 
+            { id: 'luana_parque_sd_antonio', responsable: "Antonio", bloque: 'LUANA', actividad: 'Parque', turno: 'No aplica', diasActivos: [6, 0] }, 
+            { id: 'luana_cine_v_antonio', responsable: "Antonio", bloque: 'LUANA', actividad: 'Cine', turno: 'No aplica', diasActivos: [5] } 
+        ];
+        const LOCAL_STORAGE_KEY = 'habitTrackerMariaAntonio_v9'; // Nueva versión
+
+        // --- ESTADO DE LA APLICACIÓN ---
+        let currentView = 'dailyTracker';
+        let selectedDate = new Date(2025, 4, 15); 
+        let taskStates = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
+        let selectedResponsableDaily = "Todos"; 
+        let selectedResponsableSummary = "Todos"; 
+        let selectedResponsableWeekly = "María"; 
+
+
+        // --- ELEMENTOS DEL DOM ---
+        const dailyTrackerViewEl = document.getElementById('dailyTrackerView');
+        const summaryViewEl = document.getElementById('summaryView');
+        const weeklyPlanViewEl = document.getElementById('weeklyPlanView'); 
+        const navToDailyTrackerBtn = document.getElementById('navToDailyTrackerBtn');
+        const navToSummaryBtn = document.getElementById('navToSummaryBtn');
+        const navToWeeklyPlanBtn = document.getElementById('navToWeeklyPlanBtn'); 
+
+        const prevDayBtn = document.getElementById('prevDayBtn');
+        const nextDayBtn = document.getElementById('nextDayBtn');
+        const todayBtn = document.getElementById('todayBtn');
+        const currentWeekDisplay = document.getElementById('currentWeekDisplay'); 
+        const currentDateDisplay = document.getElementById('currentDateDisplay');
+        const responsableFilterDailyEl = document.getElementById('responsableFilterDaily'); 
+        const dailyProgressLabel = document.getElementById('dailyProgressLabel'); 
+        const dailyProgressBar = document.getElementById('dailyProgressBar'); 
+        const dailyProgressPercentageText = document.getElementById('dailyProgressPercentageText'); 
+        const taskListContainer = document.getElementById('taskListContainer');
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+        
+        const responsableFilterSummaryEl = document.getElementById('responsableFilterSummary'); 
+        const summaryPeriodTypeFilter = document.getElementById('summaryPeriodTypeFilter'); 
+        const summaryWeekContainer = document.getElementById('summaryWeekContainer'); 
+        const summaryWeekInput = document.getElementById('summaryWeekInput'); 
+        const summaryMonthContainer = document.getElementById('summaryMonthContainer'); 
+        const summaryMonthInput = document.getElementById('summaryMonthInput');
+        const summaryYearInput = document.getElementById('summaryYearInput');
+        const applySummaryFiltersBtn = document.getElementById('applySummaryFiltersBtn');
+        const summaryResultsContainer = document.getElementById('summaryResultsContainer');
+
+        const responsableFilterWeeklyEl = document.getElementById('responsableFilterWeekly'); 
+        const weeklyPlanContentEl = document.getElementById('weeklyPlanContent'); 
+
+        // --- FUNCIONES UTILITARIAS ---
+        function formatDateForDisplay(date) {
+            return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function formatDateForKey(date) {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function saveTaskStates() {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(taskStates));
+        }
+        
+        function getDateRangeOfMonth(monthIndex, year) { 
+            const startDate = new Date(year, monthIndex, 1);
+            const endDate = new Date(year, monthIndex + 1, 0); 
+            return { startDate, endDate };
+        }
+
+        function getISOWeek(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7; 
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum); 
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        }
+        
+        function getDateRangeOfWeek(weekNum, year) {
+            const d = new Date(year, 0, 1 + (weekNum - 1) * 7); 
+            const day = d.getDay() || 7; 
+            if (day !== 1) { 
+                d.setHours(-24 * (day - 1)); 
+            }
+            const startDate = new Date(d);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+            return { startDate, endDate };
+        }
+
+
+        // --- LÓGICA DE NAVEGACIÓN DE VISTAS ---
+        function switchView(viewToShow) {
+            currentView = viewToShow;
+            dailyTrackerViewEl.classList.add('view-hidden');
+            summaryViewEl.classList.add('view-hidden');
+            weeklyPlanViewEl.classList.add('view-hidden'); 
+
+            navToDailyTrackerBtn.classList.replace('btn-nav-active', 'btn-nav-inactive');
+            navToSummaryBtn.classList.replace('btn-nav-active', 'btn-nav-inactive');
+            navToWeeklyPlanBtn.classList.replace('btn-nav-active', 'btn-nav-inactive'); 
+
+            if (viewToShow === 'dailyTracker') {
+                dailyTrackerViewEl.classList.remove('view-hidden');
+                navToDailyTrackerBtn.classList.add('btn-nav-active');
+                renderDailyTasks(); 
+            } else if (viewToShow === 'summary') {
+                summaryViewEl.classList.remove('view-hidden');
+                navToSummaryBtn.classList.add('btn-nav-active');
+                populateSummaryFilters();
+                applySummaryFilters(); 
+            } else if (viewToShow === 'weeklyPlan') { 
+                weeklyPlanViewEl.classList.remove('view-hidden');
+                navToWeeklyPlanBtn.classList.add('btn-nav-active');
+                renderWeeklyPlanView();
+            }
+        }
+
+        // --- LÓGICA DE SEGUIMIENTO DIARIO ---
+        function updateDateDisplay() {
+            currentDateDisplay.textContent = formatDateForDisplay(selectedDate);
+            currentWeekDisplay.textContent = `Semana ${getISOWeek(selectedDate)}`; 
+        }
+
+        function updateDailyProgressBar(tasksForDisplay) {
+            const enabledTasks = tasksForDisplay.filter(task => task.isEnabledToday);
+            const completedTasks = enabledTasks.filter(task => task.calculatedStatus === '✅');
+            
+            let percentage = 0;
+            if (enabledTasks.length > 0) {
+                percentage = Math.round((completedTasks.length / enabledTasks.length) * 100);
+            }
+            
+            dailyProgressBar.style.width = `${percentage}%`;
+            dailyProgressBar.textContent = `${percentage}%`; 
+            dailyProgressPercentageText.textContent = `${percentage}%`;
+            dailyProgressLabel.textContent = `Progreso del Día (${selectedResponsableDaily}):`;
+        }
+
+
+        function renderDailyTasks() {
+            updateDateDisplay(); 
+            taskListContainer.innerHTML = ''; 
+            selectedResponsableDaily = responsableFilterDailyEl.value; 
+
+            const dateKey = formatDateForKey(selectedDate);
+            const dayOfWeek = selectedDate.getDay(); 
+
+            let filteredHabitDefinitions = habitDefinitions;
+            if (selectedResponsableDaily !== "Todos") {
+                filteredHabitDefinitions = habitDefinitions.filter(h => h.responsable === selectedResponsableDaily);
+            }
+
+            const tasksForDisplay = filteredHabitDefinitions.map(habit => {
+                let status = ''; 
+                let isEnabled = habit.diasActivos.includes(dayOfWeek);
+
+                if (habit.excepciones && habit.excepciones[dateKey] === '🚫') {
+                    status = '🚫';
+                    isEnabled = false; 
+                } else if (!isEnabled) {
+                    status = '🚫'; 
+                } else {
+                    status = (taskStates[dateKey] && taskStates[dateKey][habit.id]) ? taskStates[dateKey][habit.id] : '';
+                }
+                return { ...habit, calculatedStatus: status, isEnabledToday: isEnabled && status !== '🚫' };
+            });
+            
+            updateDailyProgressBar(tasksForDisplay); 
+
+            const tasksByBloque = tasksForDisplay.reduce((acc, task) => {
+                if (task.isEnabledToday || task.calculatedStatus === '🚫') {
+                    acc[task.bloque] = acc[task.bloque] || [];
+                    acc[task.bloque].push(task);
+                }
+                return acc;
+            }, {});
+
+            if (Object.keys(tasksByBloque).length === 0) {
+                taskListContainer.innerHTML = `<p class="text-center text-gray-400 py-4">No hay tareas programadas para ${selectedResponsableDaily} este día.</p>`;
+                return;
+            }
+            
+            const uniqueBloquesFromFiltered = [...new Set(filteredHabitDefinitions.map(h => h.bloque))].sort();
+
+
+            for (const bloque of uniqueBloquesFromFiltered) {
+                if (!tasksByBloque[bloque] || tasksByBloque[bloque].length === 0) continue; 
+
+                const bloqueDiv = document.createElement('div');
+                bloqueDiv.className = 'mb-6';
+                bloqueDiv.innerHTML = `<h3 class="text-xl font-semibold text-indigo-400 mb-3 border-b border-gray-700 pb-1">${bloque}</h3>`;
+                
+                const ul = document.createElement('ul');
+                ul.className = 'space-y-3';
+
+                const sortedTasksInBlock = tasksByBloque[bloque].sort((a,b) => a.actividad.localeCompare(b.actividad));
+
+                sortedTasksInBlock.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = 'bg-gray-700 p-3 sm:p-4 rounded-lg shadow flex flex-col sm:flex-row justify-between items-start sm:items-center';
+                    
+                    let taskHtml = `
+                        <div class="mb-2 sm:mb-0 flex-grow">
+                            <p class="font-medium text-lg text-gray-100">${task.actividad}</p>
+                            <p class="text-sm text-gray-400">Turno: ${task.turno} - Responsable: ${task.responsable}</p> </div>
+                        <div class="flex space-x-2 flex-shrink-0">`;
+
+                    if (task.calculatedStatus === '🚫') {
+                        taskHtml += `<button class="task-btn task-btn-disabled" disabled>🚫</button>`;
+                    } else {
+                        taskHtml += `
+                            <button class="task-btn ${task.calculatedStatus === '✅' ? 'task-btn-done' : 'task-btn-pending'}" data-task-id="${task.id}" data-status="✅">✅</button>
+                            <button class="task-btn ${task.calculatedStatus === '❌' ? 'task-btn-not-done' : 'task-btn-pending'}" data-task-id="${task.id}" data-status="❌">❌</button>
+                        `;
+                    }
+                    taskHtml += `</div>`;
+                    li.innerHTML = taskHtml;
+                    ul.appendChild(li);
+                });
+                bloqueDiv.appendChild(ul);
+                taskListContainer.appendChild(bloqueDiv);
+            }
+
+            taskListContainer.querySelectorAll('button[data-task-id]').forEach(button => {
+                if (!button.disabled) {
+                    button.addEventListener('click', handleTaskStatusChange);
+                }
+            });
+        }
+
+        function handleTaskStatusChange(event) {
+            const taskId = event.currentTarget.dataset.taskId;
+            const newStatus = event.currentTarget.dataset.status;
+            const dateKey = formatDateForKey(selectedDate);
+
+            taskStates[dateKey] = taskStates[dateKey] || {};
+            
+            if (taskStates[dateKey][taskId] === newStatus) {
+                delete taskStates[dateKey][taskId];
+            } else {
+                taskStates[dateKey][taskId] = newStatus;
+            }
+
+            saveTaskStates();
+            renderDailyTasks(); 
+        }
+
+        function changeDate(days) {
+            selectedDate.setDate(selectedDate.getDate() + days);
+            renderDailyTasks();
+        }
+
+        function goToToday() {
+            selectedDate = new Date(2025, 4, 15); 
+            renderDailyTasks();
+        }
+
+        function exportToCSV() {
+            const dateKey = formatDateForKey(selectedDate);
+            const dayOfWeek = selectedDate.getDay();
+            let csvContent = "data:text/csv;charset=utf-8,Fecha,Responsable,Bloque,Actividad,Turno,Estado\n";
+            
+            let habitsToExport = habitDefinitions;
+            if (selectedResponsableDaily !== "Todos") {
+                habitsToExport = habitDefinitions.filter(h => h.responsable === selectedResponsableDaily);
+            }
+
+
+            habitsToExport.forEach(habit => {
+                let isEnabled = habit.diasActivos.includes(dayOfWeek);
+                let finalStatus = '';
+
+                if (habit.excepciones && habit.excepciones[dateKey] === '🚫') {
+                    finalStatus = '🚫';
+                    isEnabled = false;
+                } else if (!isEnabled) {
+                    finalStatus = '🚫';
+                } else {
+                    finalStatus = (taskStates[dateKey] && taskStates[dateKey][habit.id]) ? taskStates[dateKey][habit.id] : 'Pendiente';
+                }
+                
+                if (isEnabled || (habit.excepciones && habit.excepciones[dateKey] === '🚫')) {
+                     csvContent += `${dateKey},"${habit.responsable}","${habit.bloque}","${habit.actividad}","${habit.turno}","${finalStatus}"\n`;
+                }
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `seguimiento_habitos_${dateKey}_${selectedResponsableDaily}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- LÓGICA DE RESUMEN DE HÁBITOS ---
+        function togglePeriodInputs() {
+            const periodType = summaryPeriodTypeFilter.value;
+            if (periodType === 'semana') {
+                summaryWeekContainer.classList.remove('view-hidden');
+                summaryMonthContainer.classList.add('view-hidden');
+            } else if (periodType === 'mes') {
+                summaryWeekContainer.classList.add('view-hidden');
+                summaryMonthContainer.classList.remove('view-hidden');
+            }
+        }
+
+        function populateSummaryFilters() {
+            summaryMonthInput.innerHTML = ''; 
+            const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            meses.forEach((mes, index) => {
+                const option = document.createElement('option');
+                option.value = index; 
+                option.textContent = mes;
+                summaryMonthInput.appendChild(option);
+            });
+            
+            const now = new Date();
+            responsableFilterSummaryEl.value = selectedResponsableSummary; 
+            if (!summaryYearInput.value) { 
+                 summaryYearInput.value = now.getFullYear();
+            }
+            if (!summaryWeekInput.value) { 
+                summaryWeekInput.value = getISOWeek(now);
+            }
+            summaryMonthInput.value = now.getMonth(); 
+            togglePeriodInputs(); 
+        }
+
+
+        function applySummaryFilters() {
+            selectedResponsableSummary = responsableFilterSummaryEl.value; 
+            const periodType = summaryPeriodTypeFilter.value;
+            const year = parseInt(summaryYearInput.value);
+            let startDate, endDate, periodDescription;
+
+            if (isNaN(year) || year < 2000 || year > 2100 ) { 
+                summaryResultsContainer.innerHTML = `<p class="text-red-400 text-lg text-center">Por favor, ingresa un año válido.</p>`;
+                return;
+            }
+
+            if (periodType === 'semana') {
+                const week = parseInt(summaryWeekInput.value);
+                if (isNaN(week) || week < 1 || week > 53) {
+                    summaryResultsContainer.innerHTML = `<p class="text-red-400 text-lg text-center">Por favor, ingresa un número de semana (1-53) válido.</p>`;
+                    return;
+                }
+                ({ startDate, endDate } = getDateRangeOfWeek(week, year));
+                periodDescription = `la semana ${week} de ${year}`;
+            } else { // Mes
+                const monthIndex = parseInt(summaryMonthInput.value); 
+                if (isNaN(monthIndex) || monthIndex < 0 || monthIndex > 11) {
+                     summaryResultsContainer.innerHTML = `<p class="text-red-400 text-lg text-center">Por favor, selecciona un mes válido.</p>`;
+                    return;
+                }
+                ({ startDate, endDate } = getDateRangeOfMonth(monthIndex, year));
+                const monthName = summaryMonthInput.options[summaryMonthInput.selectedIndex].text;
+                periodDescription = `el mes de ${monthName} de ${year}`;
+            }
+            
+            let overallDoneCount = 0;
+            let overallConsideredCount = 0;
+            const activitySummaryData = {}; 
+
+            let habitsToConsider = habitDefinitions;
+            if (selectedResponsableSummary !== "Todos") {
+                habitsToConsider = habitDefinitions.filter(h => h.responsable === selectedResponsableSummary);
+            }
+
+
+            habitsToConsider.forEach(habit => { 
+                activitySummaryData[habit.id] = { 
+                    name: habit.actividad, 
+                    bloque: habit.bloque,
+                    done: 0, 
+                    considered: 0 
+                };
+            });
+
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const currentDateKey = formatDateForKey(new Date(d)); 
+                const currentDayOfWeek = new Date(d).getDay();
+
+                habitsToConsider.forEach(habit => { 
+                    const isScheduledDay = habit.diasActivos.includes(currentDayOfWeek);
+                    const isExceptionDisabled = habit.excepciones && habit.excepciones[currentDateKey] === '🚫';
+
+                    if (isScheduledDay && !isExceptionDisabled) { 
+                        overallConsideredCount++;
+                        if(activitySummaryData[habit.id]) { 
+                           activitySummaryData[habit.id].considered++;
+                        }
+                        
+                        const status = (taskStates[currentDateKey] && taskStates[currentDateKey][habit.id]);
+                        if (status === '✅') {
+                            overallDoneCount++;
+                            if(activitySummaryData[habit.id]) { 
+                               activitySummaryData[habit.id].done++;
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (overallConsideredCount > 0) {
+                const overallPercentage = Math.round((overallDoneCount / overallConsideredCount) * 100);
+                let resultsHtml = `
+                    <p class="text-2xl font-bold text-green-400 mb-1 text-center">${overallPercentage}% de Cumplimiento General (${selectedResponsableSummary})</p>
+                    <p class="text-sm text-gray-400 mb-4 text-center">
+                        (${overallDoneCount} de ${overallConsideredCount} tareas consideradas en ${periodDescription})
+                    </p>`;
+                
+                const uniqueBloques = [...new Set(habitsToConsider.map(h => h.bloque))].sort(); 
+                let hasAnyActivityData = false;
+
+                uniqueBloques.forEach(bloque => {
+                    let blockHtml = `<h4 class="text-lg font-semibold text-indigo-300 mb-2 mt-5">${bloque}</h4><div class="space-y-2">`;
+                    let activitiesInBlockCount = 0;
+
+                    const activitiesInThisBlock = habitsToConsider 
+                        .filter(h => h.bloque === bloque)
+                        .sort((a, b) => a.actividad.localeCompare(b.actividad));
+
+                    activitiesInThisBlock.forEach(habit => {
+                        const activityData = activitySummaryData[habit.id];
+                        if (activityData && activityData.considered > 0) { 
+                            activitiesInBlockCount++;
+                            hasAnyActivityData = true;
+                            const activityPercentage = Math.round((activityData.done / activityData.considered) * 100);
+                            blockHtml += `
+                                <div class="bg-gray-600 p-3 rounded-md">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-gray-200 text-sm">${activityData.name}</span>
+                                        <span class="font-semibold text-white text-sm">${activityPercentage.toFixed(1)}%</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: ${activityPercentage}%;"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-1 text-right">(${activityData.done} de ${activityData.considered})</p>
+                                </div>`;
+                        }
+                    });
+                    blockHtml += `</div>`;
+                    if (activitiesInBlockCount > 0) {
+                        resultsHtml += blockHtml;
+                    }
+                });
+                
+                if (!hasAnyActivityData && overallConsideredCount > 0) {
+                     resultsHtml += `<p class="text-gray-400 text-sm text-center mt-4">No hubo actividades específicas con datos para desglosar para ${selectedResponsableSummary} en este periodo.</p>`;
+                }
+
+
+                summaryResultsContainer.innerHTML = resultsHtml;
+
+            } else {
+                summaryResultsContainer.innerHTML = `<p class="text-gray-400 text-lg text-center">No hay datos de tareas consideradas para ${selectedResponsableSummary} en ${periodDescription}.</p>`;
+            }
+        }
+
+        // --- LÓGICA DE PLANIFICACIÓN SEMANAL (MODIFICADA) ---
+        function renderWeeklyPlanView() {
+            selectedResponsableWeekly = responsableFilterWeeklyEl.value;
+            weeklyPlanContentEl.innerHTML = ''; 
+
+            const daysOfWeekNames = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+            const dayMap = { "Lunes": 1, "Martes": 2, "Miércoles": 3, "Jueves": 4, "Viernes": 5, "Sábado": 6, "Domingo": 0 };
+
+            let habitsToDisplay = habitDefinitions;
+            if (selectedResponsableWeekly !== "Todos") {
+                habitsToDisplay = habitDefinitions.filter(h => h.responsable === selectedResponsableWeekly);
+                 weeklyPlanContentEl.innerHTML = generatePlanTableNewFormat(selectedResponsableWeekly, habitsToDisplay, daysOfWeekNames, dayMap);
+            } else {
+                const planMaria = generatePlanTableNewFormat("María", habitDefinitions.filter(h => h.responsable === "María"), daysOfWeekNames, dayMap);
+                const planAntonio = generatePlanTableNewFormat("Antonio", habitDefinitions.filter(h => h.responsable === "Antonio"), daysOfWeekNames, dayMap);
+                weeklyPlanContentEl.innerHTML = planMaria + planAntonio;
+            }
+        }
+
+        function generatePlanTableNewFormat(responsableName, habits, daysOfWeekNames, dayMap) {
+            let tableHtml = `<h3 class="text-xl font-semibold text-center text-indigo-300 my-4">Planificación de ${responsableName}</h3>`;
+            tableHtml += '<table class="weekly-plan-table">';
+            tableHtml += '<thead><tr><th>Bloque</th><th>Actividad <span class="text-xs text-gray-400">(Turno)</span></th>';
+            daysOfWeekNames.forEach(dayName => {
+                tableHtml += `<th class="day-header-cell"><div class="day-header-content">${dayName.substring(0,3)}</div></th>`;
+            }); 
+            tableHtml += '</tr></thead><tbody>';
+
+            const bloques = [...new Set(habits.map(h => h.bloque))].sort();
+
+            bloques.forEach(bloque => {
+                const actividadesDelBloque = habits.filter(h => h.bloque === bloque).sort((a,b) => a.actividad.localeCompare(b.actividad));
+                actividadesDelBloque.forEach((actividad, index) => {
+                    tableHtml += '<tr>';
+                    if (index === 0) { 
+                        tableHtml += `<td rowspan="${actividadesDelBloque.length}" class="bloque-cell">${bloque}</td>`;
+                    }
+                    tableHtml += `<td>${actividad.actividad} <span class="text-xs text-gray-400">(${actividad.turno})</span></td>`;
+                    daysOfWeekNames.forEach(dayName => {
+                        const dayIndex = dayMap[dayName];
+                        const isScheduled = actividad.diasActivos.includes(dayIndex);
+                        const cellClass = isScheduled ? 'plan-day-scheduled' : 'plan-day-not-scheduled';
+                        tableHtml += `<td class="plan-day-cell ${cellClass}"></td>`; 
+                    });
+                    tableHtml += '</tr>';
+                });
+            });
+
+            tableHtml += '</tbody></table>';
+            if (habits.length === 0) { 
+                 tableHtml = `<h3 class="text-xl font-semibold text-center text-indigo-300 my-4">Planificación de ${responsableName}</h3> <p class="text-center text-gray-400">No hay tareas planificadas para ${responsableName}.</p>`;
+            }
+            return tableHtml;
+        }
+
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            navToDailyTrackerBtn.addEventListener('click', () => switchView('dailyTracker'));
+            navToSummaryBtn.addEventListener('click', () => switchView('summary'));
+            navToWeeklyPlanBtn.addEventListener('click', () => switchView('weeklyPlan')); 
+
+            prevDayBtn.addEventListener('click', () => changeDate(-1));
+            nextDayBtn.addEventListener('click', () => changeDate(1));
+            todayBtn.addEventListener('click', () => goToToday);
+            exportCsvBtn.addEventListener('click', exportToCSV);
+            
+            responsableFilterDailyEl.addEventListener('change', renderDailyTasks); 
+            responsableFilterSummaryEl.addEventListener('change', applySummaryFilters); 
+            responsableFilterWeeklyEl.addEventListener('change', renderWeeklyPlanView); 
+            summaryPeriodTypeFilter.addEventListener('change', () => {
+                togglePeriodInputs();
+                applySummaryFilters(); 
+            }); 
+            applySummaryFiltersBtn.addEventListener('click', applySummaryFilters);
+
+            switchView('dailyTracker'); 
+        });
+    </script>
+</body>
+</html>
